@@ -106,12 +106,13 @@ test(
     join_paths(meson.current_source_dir(), 'test/data')]
   )
 test(
-  'unittest_jsontestrunner',
+  'jsonchecker_jsontestrunner',
   python,
   args : [
     '-B',
     join_paths(meson.current_source_dir(), 'test/runjsontests.py'),
     '--with-json-checker',
     jsontestrunner,
-    join_paths(meson.current_source_dir(), 'test/data')]
+    join_paths(meson.current_source_dir(), 'test/data')],
+  workdir : join_paths(meson.current_source_dir(), 'test/data'),
   )
