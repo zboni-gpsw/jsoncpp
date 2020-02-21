@@ -11,7 +11,7 @@ import sys
 import os
 import os.path
 import optparse
-import time
+from time import process_time, sleep
 
 VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes '
 
@@ -53,16 +53,18 @@ def compareOutputs(expected, actual, message):
 
 def safeReadFile(file_path):
     # We may try to read early, so wait if the file doesn't exist yet.
-    MAX_MILLISECONDS_TO_WAIT = 1000
-    for _ in range(int(MAX_MILLISECONDS_TO_WAIT / 10)):
-        if os.path.exists(file_path):
-            break
-        time.sleep(.01)
-
-    try:
-        return open(file_path, 'rt', encoding='utf-8').read()
-    except IOError as e:
-        return '<File "%s" is missing: %s>' % (file_path, e)
+    # NOTE: value chosen experimentally, may want to increase or decrease
+    # depending on real world application.
+    NUM_TIMES_TO_TRY = 50
+    error = ""
+    for i in range(NUM_TIMES_TO_TRY):
+        try:
+            print ("try {}".format(i))
+            return open(file_path, 'rt', encoding='utf-8').read()
+        except IOError as e:
+            error = '<Opening file "%s" failed with error: %s>' % (file_path, e)
+            sleep(.1)
+    return error
 
 
 def runAllTests(jsontest_executable_path, input_dir=None,

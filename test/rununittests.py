@@ -13,7 +13,7 @@ import os.path
 import subprocess
 import optparse
 
-VALGRIND_CMD = 'valgrind --tool=memcheck --leak-check=yes --undef-value-errors=yes'
+VALGRIND_CMD = ['valgrind', '--tool=memcheck', '--leak-check=yes', '--undef-value-errors=yes']
 
 class TestProxy(object):
     def __init__(self, test_exe_path, use_valgrind=False):
