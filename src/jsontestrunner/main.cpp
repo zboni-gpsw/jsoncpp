@@ -129,6 +129,7 @@ static int parseAndSaveValueTree(const Json::String& input,
                                  const Json::String& kind,
                                  const Json::Features& features, bool parseOnly,
                                  Json::Value* root, bool use_legacy) {
+  remove(actual.c_str());
   if (!use_legacy) {
     Json::CharReaderBuilder builder;
 
@@ -163,7 +164,8 @@ static int parseAndSaveValueTree(const Json::String& input,
   }
 
   if (!parseOnly) {
-    FILE* factual = fopen(actual.c_str(), "wt");
+    const Json::String tmp_name = actual + ".tmp";
+    FILE* factual = fopen(tmp_name.c_str(), "wt");
     if (!factual) {
       std::cerr << "Failed to create '" << kind << "' actual file."
                 << std::endl;
@@ -171,6 +173,11 @@ static int parseAndSaveValueTree(const Json::String& input,
     }
     printValueTree(factual, *root);
     fclose(factual);
+    // The python test harness has a nasty habit of prematurely trying to read
+    // our output files. To ensure that files currently being flushed and closed
+    // are not read prematurely, we delete the last ran output, and output to a
+    // temporary file that only gets renamed upon completion.
+    rename(tmp_name.c_str(), actual.c_str());
   }
   return 0;
 }
